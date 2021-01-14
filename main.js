@@ -19,4 +19,4 @@ function quit() {
     return process.exit(2);
 }
 
-client.login("Nzk5MzIzOTUyNzE5MzMxMzI5.YAB6cQ.CbK9jUnIfxW2ZPAjyJ73xlTQS68");
+client.login(process.env.BOT_TOKEN);
