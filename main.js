@@ -1,13 +1,14 @@
 //@ts-check
+// ENV VARS: ["TEST_GUILD_ID","BOT_TOKEN"]
 
 import Discord from "discord.js";
 import CommandManager from "./commands/manager.js";
 const client = new Discord.Client();
 // @ts-ignore
-const cmdManager = new CommandManager(client.api,client.ws);
+const cmdManager = new CommandManager(client);
 
 
-var guildId = "799324825532760155";
+var guildId = process.env.TEST_GUILD_ID;
 
 client.once("ready",()=>{
     console.log("BOT STARTED:",client.user.tag,client.user.id);
@@ -19,12 +20,24 @@ client.on("message",async msg => {
         var {content,channel:c} = msg;
         console.log(content,msg.author.id);
         switch(content) {
+            case "-uc":
+                await cmdManager.updateCommands(guildId);
+                c.send("UPDATED");
+                break;
+            case "-cc":
+                cmdManager.clearCommands(guildId);
+                break;
+            case "-ccg":
+                cmdManager.clearCommands();
+                break;
             case "-gc":
-                    c.send("GETTING COMMANDS:");
-                    var commandsRoute = await cmdManager.getCommandsRoute(guildId);
-                    var commandsList = await commandsRoute.get();
+                    var commandsList = await cmdManager.getAllCommands(guildId);
                     c.send(JSON.stringify(commandsList));
                 break;
+            case "-gcg":
+                var commandsList = await cmdManager.getAllCommands();
+                c.send(JSON.stringify(commandsList));
+            break;
             case "-echo":
                 c.send("ECHO");
                 break;
