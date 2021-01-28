@@ -19,27 +19,29 @@ client.on("message",async msg => {
     if (msg.author.id != client.user.id) try {
         var {content,channel:c} = msg;
         console.log(content,msg.author.id);
+        const rgc = async ()=>c.send(JSON.stringify(await cmdManager.getAllCommands(guildId)));
+        const rgcg = async ()=>c.send(JSON.stringify(await cmdManager.getAllCommands()));
         switch(content) {
             case "-uc":
                 await cmdManager.updateCommands(guildId);
-                c.send("UPDATED");
+                await rgc();
                 break;
             case "-cc":
                 cmdManager.clearCommands(guildId);
+                await rgc();
                 break;
             case "-ccg":
                 cmdManager.clearCommands();
+                await rgcg();
                 break;
             case "-gc":
-                    var commandsList = await cmdManager.getAllCommands(guildId);
-                    c.send(JSON.stringify(commandsList));
+                await rgc();
                 break;
             case "-gcg":
-                var commandsList = await cmdManager.getAllCommands();
-                c.send(JSON.stringify(commandsList));
-            break;
+                await rgcg();
+                break;
             case "-echo":
-                c.send("ECHO");
+                c.send("echo");
                 break;
             case "-s":
                 quitClient();
@@ -47,7 +49,6 @@ client.on("message",async msg => {
         }
     } catch (e) {console.error(e);}
 });
-
 
 function quitClient() {
     client.destroy();

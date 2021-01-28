@@ -1,0 +1,35 @@
+{
+    "name": "testcmd",
+    "description":"YEEEET",
+    "options": [
+        {
+            "name":"sub0",
+            "description":"YEee2",
+            "type":1,
+            "options":[
+                {
+                    "name":"yeet",
+                    "description":"string lol",
+                    "type":3
+                }
+            ]
+        },
+        {
+            "name":"sub",
+            "description":"a subcommand",
+            "type":1,
+            "options": [
+                {
+                    "name":"int-lol",
+                    "description":"i havent a clue",
+                    "type":4
+                },
+                {
+                    "name":"roll",
+                    "description":"a pizza roll",
+                    "type":8
+                }
+            ]
+        }
+    ]
+}
