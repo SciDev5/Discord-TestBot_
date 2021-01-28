@@ -23,7 +23,7 @@ client.on("message",async msg => {
         const rgcg = async ()=>c.send(JSON.stringify(await cmdManager.getAllCommands()));
         switch(content) {
             case "-uc":
-                await cmdManager.updateCommands(guildId);
+                await cmdManager.updateCommands();
                 await rgc();
                 break;
             case "-cc":

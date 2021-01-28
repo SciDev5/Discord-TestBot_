@@ -19,13 +19,13 @@ class CommandManager {
         this.client = client;
         this.ws = client.ws;
         this.app = null;
-        this.route = null;
+        this.router = null;
         this.ready = new Promise(res=>this.#readyResolve=res);
         Object.defineProperty(this,"ready",{writable:false});
         Object.seal(this);
     }
     async clientInit() {
-        this.route = new Router(this.client);
+        this.router = new Router(this.client);
         // @ts-ignore
         this.ws.on("INTERACTION_CREATE", async (interaction,shardId)=>{
             var {id, type, data, guild_id, member, token, version} = interaction;
@@ -35,12 +35,15 @@ class CommandManager {
                         await this.commandCallback(interaction,{type:1});
                         break;
                     case 2: // APP COMMAND
-                        await this.commandCallback(interaction,Executors[data.name].call(data));
+                        var cmd = Executors.global[data.name];
+                        cmd = cmd || Executors[guild_id][data.name];
+                        await this.commandCallback(interaction,cmd.call(data));
                         break;
                 }
             } catch(e) { console.error(e); }
         });
-        await this.route.ready;
+        await this.router.ready;
+        this.app = this.router.appData;
         this.#readyResolve();
     }
 
@@ -52,7 +55,7 @@ class CommandManager {
     async clearCommands(guildId) {
         var cmds = await this.getAllCommands(guildId);
         for (var cmd of cmds)
-            await this.route.commands(guildId)(cmd.id).delete();
+            await this.router.commands(guildId)(cmd.id).delete();
     }
     /**
      * Create a new command.
@@ -60,7 +63,7 @@ class CommandManager {
      * @param {string =} guildId The id of the discord server OR undefined for global.
      */
     async createCommand(command,guildId) {
-        return await this.route.commands(guildId).post({data:command});
+        return await this.router.commands(guildId).post({data:command});
     }
     /**
      * Delete a specific command.
@@ -68,7 +71,7 @@ class CommandManager {
      * @param {string =} guildId The id of the discord server OR undefined for global.
      */
     async deleteCommand(commandId,guildId) {
-        return await this.route.commands(guildId)(commandId).delete();
+        return await this.router.commands(guildId)(commandId).delete();
     }
     /**
      * Get a specific command.
@@ -76,25 +79,25 @@ class CommandManager {
      * @param {string =} guildId The id of the discord server OR undefined for global.
      */
     async getCommand(commandId,guildId) {
-        return await this.route.commands(guildId)(commandId).get();
+        return await this.router.commands(guildId)(commandId).get();
     }
     /**
      * Get all the commands.
      * @param {string =} guildId The id of the discord server OR undefined for global.
      */
     async getAllCommands(guildId) {
-        return await this.route.commands(guildId).get();
+        return await this.router.commands(guildId).get();
     }
 
     /**
      * Update the list of commands.
-     * @param {string} guildId 
      */
     async updateCommands(guildId) {
         await this.clearCommands(guildId);
-        var cmds = await JSONHelper.readAsync(Constants.commands.listfile,{});
-        for (var cmd of cmds)
-            await this.createCommand(await JSONHelper.readAsync(Constants.commands.file,{"NAME":cmd}),guildId);
+        var commandGroups = await JSONHelper.readAsync(Constants.commands.listfile,{});
+        for (var group of commandGroups)
+            for (var cmd of group.commands)
+            await this.createCommand(await JSONHelper.readAsync(Constants.commands.file,{"NAME":cmd,"GUILD":group.guild||"global"}),group.guild);
     }
 
     /**
@@ -104,7 +107,7 @@ class CommandManager {
      * @returns {Promise<any>}
      */
     commandCallback(interaction,data) {
-        return this.route.interactCallback(interaction).post({data});
+        return this.router.interactCallback(interaction).post({data});
     }
 }
 

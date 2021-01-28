@@ -2,7 +2,7 @@ class Router {
     constructor(client) {
         this.client = client;
         this.ready = (async()=>{
-            try { this.app = await this.client.api.oauth2.applications("@me").get(); } 
+            try { this.appData = await this.client.api.oauth2.applications("@me").get(); } 
             catch (e) { console.error(e); }
             Object.seal(this);
         })();
@@ -16,7 +16,7 @@ class Router {
      * Get the API url route for this application.
      */
     app() {
-        return this.client.api.applications(this.app.id);
+        return this.client.api.applications(this.appData.id);
     }
     /**
      * Get the API url route for a given server.
@@ -47,7 +47,7 @@ class Router {
      * @param {any} interaction The interaction.
      */
     webhookInteract(interaction) {
-        return this.client.api.webhooks(this.app.id)(interaction.token);
+        return this.client.api.webhooks(this.appData.id)(interaction.token);
     }
 }
 
