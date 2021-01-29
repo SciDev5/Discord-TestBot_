@@ -1,4 +1,8 @@
 class Router {
+    /**
+     * 
+     * @param {import("discord.js").Client} client 
+     */
     constructor(client) {
         this.client = client;
         this.ready = (async()=>{

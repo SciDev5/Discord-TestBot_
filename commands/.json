@@ -1,10 +1,10 @@
 [
     {
-        "__": "THE GLOBAL COMMANDS",
+        "guilds": "global",
         "commands":[]
     },
     {
-        "guild":"799324825532760155",
+        "guilds":"testguild",
         "commands":["testcmd"]
     }
 ]

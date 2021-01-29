@@ -1,14 +1,15 @@
 //@ts-check
-// ENV VARS: ["TEST_GUILD_ID","BOT_TOKEN"]
+// ENV VARS: 
+// GUILD_MAP: {"guildgroupname":["guildid","otherguildid"],"guildgroupname2":["anotherguildid","guildid"]}
+// BOT_TOKEN: string
 
 import Discord from "discord.js";
 import CommandManager from "./commands/manager.js";
+
 const client = new Discord.Client();
-// @ts-ignore
-const cmdManager = new CommandManager(client);
+var guildMap = JSON.parse(process.env.GUILD_MAP);
+const cmdManager = new CommandManager(client,guildMap);
 
-
-var testGuildId = "799324825532760155";
 
 client.once("ready",()=>{
     console.log("BOT STARTED:",client.user.tag,client.user.id);
@@ -19,13 +20,13 @@ client.on("message",async msg => {
     console.log(msg.content,msg.author.id);
     if (msg.author.id != client.user.id && msg.member.hasPermission("ADMINISTRATOR")) try {
         var {content,channel:c} = msg;
-        const rgc = async ()=>c.send(JSON.stringify(await cmdManager.getAllCommands(testGuildId)));
-        const rgcg = async ()=>c.send(JSON.stringify(await cmdManager.getAllCommands()));
+        //const rgc = async ()=>c.send(JSON.stringify(await cmdManager.getAllCommands(guildMap)));
+        //const rgcg = async ()=>c.send(JSON.stringify(await cmdManager.getAllCommands()));
         switch(content) {
             case "-commands update":
                 await cmdManager.updateCommands();
-                await rgc();
-                await rgcg();
+                //await rgc();
+                //await rgcg();
                 break;
             /*
             case "-commands clear":

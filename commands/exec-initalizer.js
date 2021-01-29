@@ -4,7 +4,7 @@ const Executors = {
     global: {
         
     },
-    "799324825532760155": {
+    testguild: {
         testcmd: new CommandExecutor(1,[ // testcmd
             {path:["sub0"],cmd:(params)=>{ // testcmd sub0
                 return {type:4,data:{content:"you used the first one: "+JSON.stringify(params)}};

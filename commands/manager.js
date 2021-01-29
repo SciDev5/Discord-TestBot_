@@ -6,6 +6,7 @@ import Router from "../router.js";
 import JSONHelper from "../utils/json-helper.js";
 import Constants from "../utils/constants.js";
 import Executors from "./exec-initalizer.js";
+import CommandExecutor from "./executor.js";
 
 class CommandManager {
 
@@ -14,10 +15,12 @@ class CommandManager {
     /**
      * Construct a new CommandManager
      * @param {Discord.Client} client
+     * @param {any} guildMap
      */
-    constructor (client) {
+    constructor (client,guildMap) {
         this.client = client;
         this.ws = client.ws;
+        this.guildMap = guildMap;
         this.app = null;
         this.router = null;
         this.ready = new Promise(res=>this.#readyResolve=res);
@@ -35,12 +38,20 @@ class CommandManager {
                         await this.commandCallback(interaction,{type:1});
                         break;
                     case 2: // APP COMMAND
+                        /**@type {CommandExecutor}*/
                         var cmd = Executors.global[data.name];
-                        cmd = cmd || Executors[guild_id][data.name];
+                        for (var guildGroup in this.guildMap)
+                            if (this.guildMap[guildGroup].contains(guild_id)) {
+                                if (cmd) throw new Error("Multiple commands with same name used in guild ID:"+guild_id+"!");
+                                cmd = Executors[guildGroup][data.name];
+                            }
                         await this.commandCallback(interaction,cmd.call(data));
                         break;
                 }
-            } catch(e) { console.error(e); }
+            } catch(e) {
+                console.error(e); 
+                await this.commandCallback(interaction,{type:5,data:{content:"COMMAND EXEC FAILED:\n"+e.name+": "+e.message+"\n"+e.stack}});
+            }
         });
         await this.router.ready;
         this.app = this.router.appData;
@@ -56,6 +67,24 @@ class CommandManager {
         var cmds = await this.getAllCommands(guildId);
         for (var cmd of cmds)
             await this.router.commands(guildId)(cmd.id).delete();
+    }
+    /**
+     * Clear all the commands in all servers.
+     */
+    async clearAllCommands() {
+        var guildIds = [];
+        for (var group in this.guildMap)
+            for (var guildId of this.guildMap[group])
+                if (guildIds.includes(guildId)) 
+                    guildIds.push(guildId);
+        var promises = []
+        for (var guildId of guildIds)
+            promises.push(this.clearCommands(guildId));
+        promises.push((async ()=>{
+            if (await this.getAllCommands()) 
+                await this.clearCommands();
+            })());
+        await Promise.all(promises);
     }
     /**
      * Create a new command.
@@ -90,14 +119,31 @@ class CommandManager {
     }
 
     /**
-     * Update the list of commands.
+     * Update the list of commands in all scopes. [does pre-clear]
      */
-    async updateCommands(guildId) {
-        await this.clearCommands(guildId);
+    async updateCommands() {
+        await this.clearAllCommands();
         var commandGroups = await JSONHelper.readAsync(Constants.commands.listfile,{});
+        var promises = [this.updateGuildGroupCommands()];
         for (var group of commandGroups)
-            for (var cmd of group.commands)
-            await this.createCommand(await JSONHelper.readAsync(Constants.commands.file,{"NAME":cmd,"GUILD":group.guild||"global"}),group.guild);
+            promises.push(this.updateGuildGroupCommands(group));
+        await Promise.all(promises);
+    }
+    /**
+     * Update the commands for a guild group. [Doesn't pre-clear]
+     * @param {{ guilds: string; commands: any; }} [group]
+     */
+    async updateGuildGroupCommands(group) {
+        var guildIds = this.guildMap[group.guilds];
+        var promises = [];
+        for (var cmd of group.commands) {
+            var commandData = await JSONHelper.readAsync(Constants.commands.file,{"NAME":cmd,"GUILD":group.guilds});
+            if (guildIds) { 
+                for (var guildId of guildIds)
+                    promises.push(this.createCommand(commandData,guildId));
+            } else  promises.push(this.createCommand(commandData));
+        }
+        await Promise.all(promises);
     }
 
     /**
