@@ -3,8 +3,8 @@
 import Discord from "discord.js";
 import fs from "fs";
 import Router from "../router.js";
-import JSONHelper from "../json-helper.js";
-import Constants from "../constants.js";
+import JSONHelper from "../utils/json-helper.js";
+import Constants from "../utils/constants.js";
 import Executors from "./exec-initalizer.js";
 
 class CommandManager {
