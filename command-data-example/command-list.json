@@ -1,7 +1,7 @@
 [
     {
         "guilds": "global",
-        "commands":[]
+        "commands":["globalcmd"]
     },
     {
         "guilds":"testguild",

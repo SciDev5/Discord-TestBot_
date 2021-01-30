@@ -1,14 +1,14 @@
 //@ts-check
-// ENV VARS: 
-// GUILD_MAP: {"guildgroupname":["guildid","otherguildid"],"guildgroupname2":["anotherguildid","guildid"]}
-// BOT_TOKEN: string
 
 import Discord from "discord.js";
 import CommandManager from "./commands/manager.js";
+import JSONHelper from "./utils/json-helper.js";
+
+/**@type {{bot: {auth_token: string}; guild_map: any}}*/
+const config = JSONHelper.readSync("./config.json");
 
 const client = new Discord.Client();
-var guildMap = JSON.parse(process.env.GUILD_MAP);
-const cmdManager = new CommandManager(client,guildMap);
+const cmdManager = new CommandManager(client,config.guild_map);
 
 
 client.once("ready",()=>{
@@ -55,4 +55,4 @@ function quitClient() {
     client.destroy();
     return process.exit(2);
 }
-client.login(process.env.BOT_TOKEN);
+client.login(config.bot.auth_token);

@@ -1,11 +1,9 @@
 //@ts-check
-
 import Discord from "discord.js";
-import fs from "fs";
-import Router from "../router.js";
+import Router from "../utils/router.js";
 import JSONHelper from "../utils/json-helper.js";
 import Constants from "../utils/constants.js";
-import Executors from "./exec-initalizer.js";
+import Executors from "../command-data/command-executors.js";
 import CommandExecutor from "./executor.js";
 
 class CommandManager {
@@ -41,7 +39,7 @@ class CommandManager {
                         /**@type {CommandExecutor}*/
                         var cmd = Executors.global[data.name];
                         for (var guildGroup in this.guildMap)
-                            if (this.guildMap[guildGroup].contains(guild_id)) {
+                            if (this.guildMap[guildGroup].includes(guild_id)) {
                                 if (cmd) throw new Error("Multiple commands with same name used in guild ID:"+guild_id+"!");
                                 cmd = Executors[guildGroup][data.name];
                             }

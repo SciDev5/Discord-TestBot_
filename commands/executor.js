@@ -1,8 +1,5 @@
 //@ts-check
 import { MessageEmbed } from "discord.js";
-import CommandManager from "./manager.js";
-import Coomands from "./exec-initalizer.js";
-import Executors from "./exec-initalizer.js";
 
 class CommandExecutor {
     /**

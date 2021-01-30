@@ -1,6 +1,6 @@
 export default {
     "commands":{
-        "listfile":"./commands/.json",
-        "file":"./commands/outlines/<GUILD>/<NAME>.json"
+        "listfile":"./command-data/.json",
+        "file":"./commands-data/<GUILD>/<NAME>.json"
     }
 }

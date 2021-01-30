@@ -2,7 +2,11 @@ import CommandExecutor from "../commands/executor.js";
 
 const Executors = {
     global: {
-        
+        globalcmd: new CommandExecutor(0,[ // globalcmd
+            {path:[],cmd:(params)=>{
+                return {type:4,data:{content:"global command"}}
+            }}
+        ])
     },
     testguild: {
         testcmd: new CommandExecutor(1,[ // testcmd
