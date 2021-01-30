@@ -5,7 +5,7 @@ A test discord bot for testing.
 
 > **!NOTE!**: The `./` directory is the root directory and it is where the `./main.js` and `./package.json` files are.
 
-> **!NOTE!**: The things in triangle braces are to be substituted with your own values.
+> **!NOTE!**: The things in triangle braces (<>) are to be substituted with your own values.
 
 ### 1. Create `./config.json`
 
@@ -16,7 +16,8 @@ Here is what `./config.json` should contain:
         "auth_token":"<your_bot_token>"
     },
     "guild_map": {
-        "testguild": ["<your_guild_id>"]
+        "<your_guild_group>": ["<your_guild_id>","<another_guild_id>"],
+        "<second_guild_group>": ["<another_guild_id>"],
     }
 }
 ```
