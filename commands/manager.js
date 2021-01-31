@@ -43,7 +43,7 @@ class CommandManager {
                                 if (cmd) throw new Error("Multiple commands with same name used in guild ID:"+guild_id+"!");
                                 cmd = Executors[guildGroup][data.name];
                             }
-                        await this.commandCallback(interaction,cmd.call(data));
+                        await this.commandCallback(interaction,await cmd.call(data,interaction));
                         break;
                 }
             } catch(e) {
@@ -73,7 +73,7 @@ class CommandManager {
         var guildIds = [];
         for (var group in this.guildMap)
             for (var guildId of this.guildMap[group])
-                if (guildIds.includes(guildId)) 
+                if (!guildIds.includes(guildId)) 
                     guildIds.push(guildId);
         var promises = []
         for (var guildId of guildIds)

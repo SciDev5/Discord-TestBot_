@@ -1,10 +1,10 @@
 //@ts-check
-import { MessageEmbed } from "discord.js";
+import { GuildMember, MessageEmbed } from "discord.js";
 
 class CommandExecutor {
     /**
      * @param {number} cmdLevels
-     * @param {{path:string[],cmd:((params: {name:string,value:any}[]) => {type:number,data:{tts?:boolean,content:string,embeds?:MessageEmbed,allowed_mentions?:import("discord.js").MessageMentionTypes}})}[]} executions 
+     * @param {{path:string[],cmd:((params: {name:string,value:any}[], interaction: {data:any;id:string;type:number;guild_id:string;channel_id:string;member:GuildMember;token:string;version:number}) => Promise<{type:number,data:{tts?:boolean,content:string,embeds?:MessageEmbed,allowed_mentions?:import("discord.js").MessageMentionTypes}}>)}[]} executions 
      */
     constructor(cmdLevels,executions) {
         this.executions = executions;
@@ -14,22 +14,24 @@ class CommandExecutor {
      * 
      * @param {{name:string,value?:any,options?:any[]}} options 
      * @param {string[] =} path
-     * @returns {{type:number,data:{tts?:boolean,content:string,embeds?:MessageEmbed,allowed_mentions?:import("discord.js").MessageMentionTypes}}}
+     * @param {{data:any;id:string;type:number;guild_id:string;channel_id:string;member:GuildMember;token:string;version:number}} interaction
+     * @returns {Promise<{type:number,data:{tts?:boolean,content:string,embeds?:MessageEmbed,allowed_mentions?:import("discord.js").MessageMentionTypes}}>}
      */
-    call(options,path){
+    call(options,interaction,path){
         /**@type {string[]}*/
         var path_ = path || [];
         if (this.cmdLevels > path_.length)
             for (var subCommand of options.options)
-                return this.call(subCommand,path_.concat(subCommand.name));
+                return this.call(subCommand,interaction,path_.concat(subCommand.name));
         else
-            return this.execCommand(options.options,path);
+            return this.execCommand(options.options,path,interaction);
     }
     /**
      * @param {{name:string,value:any}[]} params
      * @param {string[]} path
+     * @param {{data:any;id:string;type:number;guild_id:string;channel_id:string;member:GuildMember;token:string;version:number}} interaction
      */
-    execCommand(params,path) {
+    execCommand(params,path,interaction) {
         var executor = null;
         for (var exec of this.executions) {
             if (this.checkExecMatches(exec,path)) {
@@ -37,7 +39,7 @@ class CommandExecutor {
             }
         }
         if (!executor) throw new Error("sub command executor missing");
-        return exec.cmd(params || []);
+        return exec.cmd(params || [], interaction);
     }
 
     /**

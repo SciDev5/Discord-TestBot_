@@ -1,0 +1,31 @@
+{
+    "name": "announce-meetings",
+    "description":"Set whether or not you want to be told about remote meetings.",
+    "options": [
+        {
+            "name":"on",
+            "description":"Turn on remote meeting notifications.",
+            "type":1,
+            "options":[]
+        },
+        {
+            "name":"off",
+            "description":"Turn off remote meeting notifications.",
+            "type":1,
+            "options": []
+        },
+        {
+            "name":"setchannel",
+            "description":"[Admin] Set the channel for announcements.",
+            "type":1,
+            "options": [
+                {
+                    "name":"channel",
+                    "description":"The new announcement channel.",
+                    "type":7,
+                    "required":true
+                }
+            ]
+        }
+    ]
+}

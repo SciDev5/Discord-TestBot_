@@ -1,0 +1,10 @@
+[
+    {
+        "guilds": "global",
+        "commands":[]
+    },
+    {
+        "guilds":"robotics-meetings",
+        "commands":["meeting","announce-meetings"]
+    }
+]

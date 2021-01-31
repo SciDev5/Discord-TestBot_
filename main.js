@@ -4,46 +4,40 @@ import Discord from "discord.js";
 import CommandManager from "./commands/manager.js";
 import JSONHelper from "./utils/json-helper.js";
 
+import roboMeetingsInit from "./command-data/robotics-meetings/init.js";
+import Executors from "./command-data/command-executors.js";
+
 /**@type {{bot: {auth_token: string}; guild_map: any}}*/
 const config = JSONHelper.readSync("./config.json");
 
 const client = new Discord.Client();
 const cmdManager = new CommandManager(client,config.guild_map);
 
+Executors.client = client;
+Object.freeze(Executors);
 
 client.once("ready",()=>{
     console.log("BOT STARTED:",client.user.tag,client.user.id);
     client.user.setPresence({activity:{name:"A test bot for testing",type:"PLAYING"}});
     cmdManager.clientInit();
+    roboMeetingsInit(client,config);
 });
 client.on("message",async msg => {
     console.log(msg.content,msg.author.id);
     if (msg.author.id != client.user.id && msg.member.hasPermission("ADMINISTRATOR")) try {
         var {content,channel:c} = msg;
-        //const rgc = async ()=>c.send(JSON.stringify(await cmdManager.getAllCommands(guildMap)));
-        //const rgcg = async ()=>c.send(JSON.stringify(await cmdManager.getAllCommands()));
         switch(content) {
-            case "-commands update":
+            case "-cu":
+            case "-cmd update":
                 await cmdManager.updateCommands();
-                //await rgc();
-                //await rgcg();
+                c.send('updated');
                 break;
-            /*
-            case "-commands clear":
-                cmdManager.clearCommands(guildId);
-                await rgc();
+            case "-cc":
+            case "-cmd clear":
+                await cmdManager.clearAllCommands();
+                c.send('cleared');
                 break;
-            case "-commands clear global":
-                cmdManager.clearCommands();
-                await rgcg();
-                break;
-            case "-commands get":
-                await rgc();
-                break;
-            case "-commands get global":
-                await rgcg();
-                break;
-            */
+            case "-s":
             case "-stop":
                 quitClient();
                 break;
