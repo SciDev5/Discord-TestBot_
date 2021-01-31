@@ -182,10 +182,11 @@ const Executors = {
                 if (validationErr) return {type:4,data:{content:"*Validation Error:* "+validationErr}};
                 var meetings = await getJSONFile("meetings");
                 var dates = []; for (var date in meetings) dates.push(date);
-                dates = sortDateStrs(dates).splice(paramsKV.amount<1&&Number.isInteger(paramsKV.amount)?Infinity:paramsKV.amount||5);
+                var len = Number.isInteger(paramsKV.amount)&&paramsKV.amount>0?paramsKV.amount:10;
+                dates = sortDateStrs(dates); if (dates.length > len) dates.splice(len);
                 var content = "**Upcoming Meetings:**";
                 for (var date of dates)
-                    content += ` - \n${await meetingInfo(date,meetings)}`;
+                    content += `\n - ${await meetingInfo(date,meetings)}`;
                 return {type:4,data:{content}};
             }},
             {path:["attendence"],cmd:async(params,interaction)=>{ // date: str;
