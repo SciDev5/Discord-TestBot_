@@ -122,7 +122,7 @@ class CommandManager {
     async updateCommands() {
         await this.clearAllCommands();
         var commandGroups = await JSONHelper.readAsync(Constants.commands.listfile,{});
-        var promises = [this.updateGuildGroupCommands()];
+        var promises = [];
         for (var group of commandGroups)
             promises.push(this.updateGuildGroupCommands(group));
         await Promise.all(promises);
