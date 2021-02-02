@@ -1,5 +1,5 @@
 //@ts-check
-import { Client, Guild, GuildMember } from "discord.js";
+import { Channel, Client, Guild, GuildMember, TextChannel } from "discord.js";
 import CommandExecutor from "../commands/executor.js"; 
 import JSONHelper from "../utils/json-helper.js";
 
@@ -87,10 +87,15 @@ async function meetingInfo(date,meetings) {
     if (type == null) return `[No meeting scheduled - ${date}]`;
     return `${type.name} ${date} [${numericTimeToString(type.time[0])} - ${numericTimeToString(type.time[1])}]`;
 }
-function numericTimeToString(time) {
+/**
+ * 
+ * @param {number} time 
+ * @param {boolean =} hrs24 
+ */
+function numericTimeToString(time,hrs24) {
     var hr = Math.floor(time/60);
     var min = Math.floor(time)%60;
-    return ((hr-1)%12+1)+":"+(min<10?"0":"")+min;
+    return (hrs24?hr:((hr-1)%12+1))+":"+(min<10?"0":"")+min;
 }
 /**
  * 
@@ -101,10 +106,42 @@ function sortDateStrs(strs) {
     return strs.sort((a,b)=>new Date(a).getTime()-new Date(b).getTime());
 }
 
+async function announce(str, meetName) {
+    var client = Executors.client;
+    var data = await getJSONFile("data");
+    var targetInfo = {};
+    for (var guildId in data["announce-role"]) targetInfo[guildId] = {role:data["announce-role"][guildId]}
+    for (var guildId in data["announce-channel"]) targetInfo[guildId].channel = data["announce-channel"][guildId];
+    for (var guildId in targetInfo) {
+        var target = targetInfo[guildId];
+        if (target.channel) {
+            var guild = new Guild(client,{id:guildId});
+            var chan = new TextChannel(guild,{id:target.channel});
+            chan.send(`<@&${target.role}> **${meetName}**\n${str}`)
+        }
+    }
+}
 
+var lastLoop = new Date();
 const Executors = {
     /**@type {Client}*/
     client:null,
+    loop: async () => {
+        await clearPastMeetings();
+        var meetings = await getJSONFile("meetings");
+        var now = new Date();
+        var meetingToday = meetings[formatDate(now)];
+        if (meetingToday && now.getMinutes() != lastLoop.getMinutes()) {
+            var todayMeetingType = (await MEETING_TYPES)[meetingToday];
+            if (todayMeetingType.announce) {
+                var mDate = new Date(`${formatDate(now)} ${numericTimeToString(todayMeetingType.time[2],true)}`);
+                console.log(mDate.toLocaleTimeString(),now.toLocaleTimeString(),lastLoop.toLocaleTimeString());
+                if (now > mDate && lastLoop < mDate)
+                    await announce(todayMeetingType.announce, await meetingInfo(formatDate(now),meetings));
+            }
+        }
+        lastLoop = now;
+    },
     "global": {
     },
     "robotics-meetings": {

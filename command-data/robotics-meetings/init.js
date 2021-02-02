@@ -2,6 +2,8 @@
 
 import { Client } from "discord.js";
 import JSONHelper from "../../utils/json-helper.js";
+import Executors from "../command-executors.js";
+
 
 /**
  * 
@@ -9,6 +11,8 @@ import JSONHelper from "../../utils/json-helper.js";
  * @param {{bot: {auth_token: string}; guild_map: any}} config
  */
 export default (async (client,config) => {
+    setInterval(Executors.loop,5000);
+
     /**@type {{"announce-role":any}}*/
     var data = await JSONHelper.readAsync("./.data/robotics-meetings/data.json");
     var guildsToPopulate = [];
