@@ -24,6 +24,10 @@ client.once("ready",()=>{
 });
 client.on("message",async msg => {
     console.log(msg.content,msg.author.id);
+    var saidIm = /(i'?m|i +am) *(.*?)(\.|,|$)/i.exec(msg.content);
+    if (msg.author.id != client.user.id && saidIm) {
+        msg.channel.send(`Hello ${saidIm[2]}, i am <@${client.user.id}>.`)
+    }
     if (msg.author.id != client.user.id && msg.member.hasPermission("ADMINISTRATOR")) try {
         var {content,channel:c} = msg;
         switch(content) {
