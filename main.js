@@ -3,7 +3,7 @@
 import Discord from "discord.js";
 import JSONHelper from "./utils/json-helper.js";
 
-/**@type {{bot: {authToken: string}; debug?: boolean,annoyanceSettings:{target:string,annoyNoahPercent:number}}}*/
+/**@type {{bot: {authToken: string}; debug?: boolean, annoyanceSettings:{id:string,name:string,amount:number}}}*/
 const config = JSONHelper.readSync("./config.json");
 
 const client = new Discord.Client();
@@ -19,23 +19,23 @@ client.on("message",async msg => {
         var {content,channel:c} = msg;
         console.log(content,msg.author.id);
         // Dadjoke 1
-        var saidIm = /(i'?m|i +am) *(.*?)(\.|,|$)/i.exec(content);
+        var saidIm = /(?: |\n|^)(i'?m|i +am) +(.+?)([.,?!;:/\\"'\])]|$)/i.exec(content);
         if (msg.author.id != client.user.id && saidIm) {
             msg.channel.send(`Hello ${saidIm[2]}, i am <@${client.user.id}>.`)
         }
         // Respond to messages
-        if (msg.author.id == config.annoyanceSettings.target && Math.random() < config.annoyanceSettings.annoyNoahPercent && content.search("@everyone") == -1) {
-            var tgt = config.annoyanceSettings.target;
+        if (msg.author.id == config.annoyanceSettings.id && Math.random() < config.annoyanceSettings.amount && content.search("@everyone") == -1) {
+            var tgt = config.annoyanceSettings.id;
             var res = null;
-            switch(Math.floor(Math.random()*13)) {
-                case 0: res = "why would you say that Noah?"; break;
-                case 1: res = "shut up noah"; break;
-                case 2: res = "you are being silenced, noah"; break;
+            switch(Math.floor(Math.random()*14)) {
+                case 0: res = `why would you say that ${config.annoyanceSettings.name}?`; break;
+                case 1: res = `shut up ${config.annoyanceSettings.name}`; break;
+                case 2: res = `you are being silenced, ${config.annoyanceSettings.name.toLocaleLowerCase()}`; break;
                 case 3: res = "no"; break;
-                case 4: res = new Array(100).fill("SHUT UP NOAH").join(", "); break;
+                case 4: res = new Array(100).fill("SHUT UP "+config.annoyanceSettings.name.toLocaleUpperCase()).join(", "); break;
                 case 5: res = `<@${tgt}> ur bad`; break;
                 case 6: 
-                    res = `hey wait, i thought your name was Noah, <@${tgt}>`;
+                    //res = `hey wait, i thought your name was Noah, <@${tgt}>`;
                     console.log((await msg.guild.members.fetch(client.user.id)).permissions.has("MANAGE_NICKNAMES"));
                     msg.member.setNickname("yeet","the bot has spoken").catch(console.log)
                     break;
@@ -46,12 +46,14 @@ client.on("message",async msg => {
                     await Promise.all([msg.react("🆗"), msg.react("🇧"), msg.react("🇴"), msg.react("0️⃣"), msg.react("🇲"), msg.react("🇪"), msg.react("🇷")]);
                     break;
                 case 11: res = "do you are have stupid?"; break;
-                case 12: res = "[13th message case]"
+                case 12: res = "[13th message case]"; break;
+                case 13: res = `*\*witty response to ${config.annoyanceSettings.name}'s message\**`;
             }
             if (res) c.send(res);
         }
         // Commands
         switch(content) {
+            case "-ds":
             case "-s":
             case "-stop":
                 if (config.debug)
